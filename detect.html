@@ -4,6 +4,20 @@
 // http://code.stephenmorley.org/javascript/using-cookies/
 var Cookies={set:function(b,c,a){b=[encodeURIComponent(b)+"="+encodeURIComponent(c)];a&&("expiry"in a&&("number"==typeof a.expiry&&(a.expiry=new Date(1E3*a.expiry+ +new Date)),b.push("expires="+a.expiry.toGMTString())),"domain"in a&&b.push("domain="+a.domain),"path"in a&&b.push("path="+a.path),"secure"in a&&a.secure&&b.push("secure"));document.cookie=b.join("; ")},get:function(b,c){for(var a=[],e=document.cookie.split(/; */),d=0;d<e.length;d++){var f=e[d].split("=");f[0]==encodeURIComponent(b)&&a.push(decodeURIComponent(f[1].replace(/\+/g,"%20")))}return c?a:a[0]},clear:function(b,c){c||(c={});c.expiry=-86400;this.set(b,"",c)}};
 
+https://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript @EricNguyen & @Qwerty
+function findGetParameter(parameterName) {
+    var result = null,
+        tmp = [];
+    location.search
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+          tmp = item.split("=");
+          if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
 // globals:
 var local_url;
 var global_url;
@@ -27,6 +41,10 @@ function redirect_cb(exists) {
 }
 // based on: https://stackoverflow.com/questions/8659364/how-to-cancel-an-image-load-after-a-period-of-time
 function image_exists(url, timeout, callback) {
+	// this will prevent caching
+	var milliseconds = (new Date).getTime();
+	url = url+'?'+milliseconds;
+
 	var timer;
 	function clearTimer() {
 		if (timer) {                
@@ -73,9 +91,20 @@ function start() {
 	local_url = Cookies.get('local_url');
 	global_url = Cookies.get('global_url');
 
-	if (!global_url || window.location.href.indexOf('?set') != -1) {
+	if (!global_url || findGetParameter('set')) {
+		var tmp = findGetParameter('local_url');
+		if (tmp) {
+			local_url = tmp;
+		}
+		tmp = findGetParameter('global_url');
+		if (tmp) {
+			global_url = tmp;
+		}
 		document.write('redirection setup<br/><br/>local url: <input type="text" name="local_url" value="'+local_url+'"><br/>global url: <input type="text" name="global_url" value="'+global_url+'"><br/><button onclick="urlset()">set</button>');
 	} else {
+		if (local_url.slice(-1) == "/") {
+			local_url = local_url.slice(0, -1);
+		}
 		image_exists(local_url+hassimgpath, 250, redirect_cb);
 	}
 }
