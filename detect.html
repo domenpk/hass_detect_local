@@ -1,0 +1,88 @@
+<html>
+<head>
+<script>
+// http://code.stephenmorley.org/javascript/using-cookies/
+var Cookies={set:function(b,c,a){b=[encodeURIComponent(b)+"="+encodeURIComponent(c)];a&&("expiry"in a&&("number"==typeof a.expiry&&(a.expiry=new Date(1E3*a.expiry+ +new Date)),b.push("expires="+a.expiry.toGMTString())),"domain"in a&&b.push("domain="+a.domain),"path"in a&&b.push("path="+a.path),"secure"in a&&a.secure&&b.push("secure"));document.cookie=b.join("; ")},get:function(b,c){for(var a=[],e=document.cookie.split(/; */),d=0;d<e.length;d++){var f=e[d].split("=");f[0]==encodeURIComponent(b)&&a.push(decodeURIComponent(f[1].replace(/\+/g,"%20")))}return c?a:a[0]},clear:function(b,c){c||(c={});c.expiry=-86400;this.set(b,"",c)}};
+
+// globals:
+var local_url;
+var global_url;
+var hassimgpath = '/static/icons/favicon.ico';
+
+function image_exists_cb(exists) {
+	if (exists) {
+		document.write("yes");
+	} else {
+		document.write("no");
+	}
+}
+
+function redirect_cb(exists) {
+	var url = global_url;
+	if (exists) {
+		url = local_url;
+	}
+	document.write('redirecting to: '+url);
+	window.location.replace(url);
+}
+// based on: https://stackoverflow.com/questions/8659364/how-to-cancel-an-image-load-after-a-period-of-time
+function image_exists(url, timeout, callback) {
+	var timer;
+	function clearTimer() {
+		if (timer) {                
+			clearTimeout(timer);
+			timer = null;
+		}
+	}
+
+	function handleFail() {
+		// kill previous error handlers
+		this.onload = this.onabort = this.onerror = function() {};
+		// stop existing timer
+		clearTimer();
+		if (this.src === url) {
+			callback(false);
+		}
+	}
+
+	var tstart = window.performance.now();
+	var img = new Image();
+	img.onerror = img.onabort = handleFail;
+	img.onload = function() {
+		clearTimer();
+		var timems = window.performance.now()-tstart;
+		document.write('detected after '+timems+'ms<br/>');
+		callback(true);
+	};
+	img.src = url;
+	timer = setTimeout(function(theImg) { 
+			return function() {
+				handleFail.call(theImg);
+			};
+		}(img), timeout);
+}
+
+function urlset() {
+	Cookies.set('local_url', document.getElementsByName('local_url')[0].value);
+	Cookies.set('global_url', document.getElementsByName('global_url')[0].value);
+
+	var url = window.location.href.split('?')[0]
+	document.write('<br/><br/>OK. Test this at: <a href="'+url+'">'+url+'</a>');
+}
+function start() {
+	local_url = Cookies.get('local_url');
+	global_url = Cookies.get('global_url');
+
+	if (!global_url || window.location.href.indexOf('?set') != -1) {
+		document.write('redirection setup<br/><br/>local url: <input type="text" name="local_url" value="'+local_url+'"><br/>global url: <input type="text" name="global_url" value="'+global_url+'"><br/><button onclick="urlset()">set</button>');
+	} else {
+		image_exists(local_url+hassimgpath, 250, redirect_cb);
+	}
+}
+</script>
+</head>
+
+<body onload="start()">
+You need javascript for this to work.
+</body>
+</html>
