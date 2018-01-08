@@ -79,10 +79,14 @@ function image_exists(url, timeout, callback) {
 			};
 		}(img), timeout);
 }
+	
+function addHttp (url) {
+	return url.indexOf('http') === 0 ? url : 'http://' + url;
+}
 
 function urlset() {
-	Cookies.set('local_url', document.getElementsByName('local_url')[0].value);
-	Cookies.set('global_url', document.getElementsByName('global_url')[0].value);
+	Cookies.set('local_url', addHttp(document.getElementsByName('local_url')[0].value));
+	Cookies.set('global_url', addHttp(document.getElementsByName('global_url')[0].value));
 
 	var url = window.location.href.split('?')[0]
 	document.write('<br/><br/>OK. Test this at: <a href="'+url+'">'+url+'</a>');
