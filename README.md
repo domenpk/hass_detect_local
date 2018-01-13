@@ -34,8 +34,10 @@ http://detect.lucke.cba.si/?set=1&local_url=http://192.0.2.15:8123/&global_url=h
 
 Bookmark http://detect.lucke.cba.si/ (actually, your equivalent of this, again, no uptime guarantees for my test).
 
-On Android, you can also add it to home screen. This can be tricky, because it redirects quickly after webpage is loaded.
-With Chrome, you can disable all data connections, type in the URL (which won't load), then settings->Add to Home Screen.
+#### Android - Adding to home screen
+On Android, you can also add it to home screen. This can be tricky, because it redirects quickly after webpage is loaded. There are ways though:
+* Add it to home screen before it's configured (or delete cookies and reload so it becomes unconfigured).
+* With Chrome browser, you can disable all data connections, type in the URL (which won't load), then settings->Add to Home Screen.
 
 
 ## How does it work?
